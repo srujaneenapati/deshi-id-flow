@@ -95,6 +95,7 @@ const Index = () => {
         return (
           <FaceAuthentication 
             sessionToken={session?.sessionToken || ''} 
+            language={selectedLanguage}
             onComplete={handleFaceComplete} 
           />
         );

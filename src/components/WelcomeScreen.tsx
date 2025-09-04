@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Volume2, Shield, Clock, CheckCircle } from "lucide-react";
-import kycHeroIcon from "@/assets/kyc-hero-icon.png";
 import { useVoiceGuidance } from "@/hooks/useVoiceGuidance";
+import { getTranslation } from "@/lib/languages";
 
 interface WelcomeScreenProps {
   selectedLanguage: string;
@@ -11,6 +11,7 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps) {
   const { speak, isPlaying } = useVoiceGuidance();
+  const t = (key: string) => getTranslation(key, selectedLanguage);
 
   const playWelcomeAudio = () => {
     speak('welcome', selectedLanguage);
@@ -19,21 +20,18 @@ export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps)
   const features = [
     {
       icon: Clock,
-      title: "Quick & Easy",
-      description: "Complete in 2 minutes",
-      titleHindi: "त्वरित और आसान"
+      title: t('quickEasy'),
+      description: t('completeIn2Min'),
     },
     {
       icon: Shield,
-      title: "100% Secure",
-      description: "Bank-grade security",
-      titleHindi: "पूर्णतः सुरक्षित"
+      title: t('secure'),
+      description: t('bankGradeSecurity'),
     },
     {
       icon: CheckCircle,
-      title: "Instant Verification",
-      description: "Real-time approval",
-      titleHindi: "तत्काल सत्यापन"
+      title: t('instantVerification'),
+      description: t('realTimeApproval'),
     }
   ];
 
@@ -42,25 +40,20 @@ export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps)
       {/* Hero Section */}
       <div className="text-center space-y-6">
         <div className="w-32 h-32 mx-auto">
-          <img 
-            src={kycHeroIcon} 
-            alt="KYC Verification" 
-            className="w-full h-full object-contain"
-          />
+          <div className="w-full h-full bg-gradient-primary rounded-full flex items-center justify-center">
+            <Shield className="h-16 w-16 text-white" />
+          </div>
         </div>
         
         <div className="space-y-3">
           <h1 className="text-3xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            Digital KYC
+            {t('welcomeTitle')}
           </h1>
           <h2 className="text-xl font-semibold text-foreground">
-            {selectedLanguage === 'hi' ? 'डिजिटल पहचान सत्यापन' : 'Secure Identity Verification'}
+            {t('welcomeSubtitle')}
           </h2>
           <p className="text-muted-foreground">
-            {selectedLanguage === 'hi' 
-              ? 'आसान और सुरक्षित तरीके से अपनी पहचान सत्यापित करें'
-              : 'Verify your identity quickly and securely'
-            }
+            {t('welcomeDescription')}
           </p>
         </div>
 
@@ -73,10 +66,7 @@ export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps)
           disabled={isPlaying}
         >
           <Volume2 className={`h-4 w-4 mr-2 ${isPlaying ? 'animate-pulse' : ''}`} />
-          {isPlaying 
-            ? (selectedLanguage === 'hi' ? 'चल रहा है...' : 'Playing...')
-            : (selectedLanguage === 'hi' ? 'आवाज़ सुनें' : 'Listen to Audio Guide')
-          }
+          {isPlaying ? t('playing') : t('listenAudio')}
         </Button>
       </div>
 
@@ -92,7 +82,7 @@ export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps)
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold">
-                    {selectedLanguage === 'hi' && feature.titleHindi ? feature.titleHindi : feature.title}
+                    {feature.title}
                   </h3>
                   <p className="text-sm text-muted-foreground">{feature.description}</p>
                 </div>
@@ -110,14 +100,11 @@ export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps)
           className="w-full shadow-medium"
           onClick={onStart}
         >
-          {selectedLanguage === 'hi' ? 'KYC शुरू करें' : 'Start KYC Verification'}
+          {t('startKYC')}
         </Button>
         
         <p className="text-center text-xs text-muted-foreground">
-          {selectedLanguage === 'hi' 
-            ? '🔒 आपका डेटा एन्क्रिप्टेड और सुरक्षित है'
-            : '🔒 Your data is encrypted and secure'
-          }
+          🔒 {t('dataSecure')}
         </p>
       </div>
 
@@ -128,10 +115,7 @@ export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps)
             🇮🇳 🏛️ ✅
           </div>
           <p className="text-sm font-medium">
-            {selectedLanguage === 'hi' 
-              ? 'सरकारी मान्यता प्राप्त • डिजिलॉकर समर्थित'
-              : 'Government Recognized • DigiLocker Supported'
-            }
+            {t('govRecognized')}
           </p>
         </div>
       </div>

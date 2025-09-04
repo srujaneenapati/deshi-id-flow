@@ -5,7 +5,9 @@ interface VoiceGuidanceConfig {
   enabled: boolean;
 }
 
-const voiceTexts = {
+import { getTranslation } from '@/lib/languages';
+
+const voiceTexts: Record<string, Record<string, string>> = {
   en: {
     welcome: "Welcome to Digital KYC. Please follow the instructions to verify your identity quickly and securely.",
     languageSelected: "Language selected. Starting KYC verification process.",
@@ -21,6 +23,15 @@ const voiceTexts = {
     documentUpload: "कृपया अपने दस्तावेज़ों की स्पष्ट तस्वीरें अपलोड करें। सुनिश्चित करें कि सभी पाठ पढ़ने योग्य है।",
     faceVerification: "अपना चेहरा कैमरे में रखें और लाइवनेस निर्देशों का पालन करें।",
     success: "बधाई हो! आपका केवाईसी सत्यापन पूरा हो गया है।"
+  },
+  // Add more languages
+  bn: {
+    welcome: "ডিজিটাল KYC-তে স্বাগতম। দ্রুত এবং নিরাপদে আপনার পরিচয় যাচাই করতে নির্দেশাবলী অনুসরণ করুন।",
+    languageSelected: "ভাষা নির্বাচিত। KYC যাচাইকরণ প্রক্রিয়া শুরু করা হচ্ছে।",
+    methodSelection: "অনুগ্রহ করে আপনার পছন্দের যাচাইকরণ পদ্ধতি বেছে নিন - তাৎক্ষণিক যাচাইকরণের জন্য DigiLocker বা ম্যানুয়াল ডকুমেন্ট আপলোড।",
+    documentUpload: "অনুগ্রহ করে আপনার ডকুমেন্টের স্পষ্ট ছবি আপলোড করুন। নিশ্চিত করুন যে সমস্ত টেক্সট পড়া যায়।",
+    faceVerification: "ক্যামেরায় আপনার মুখ রাখুন এবং লাইভনেস নির্দেশাবলী অনুসরণ করুন।",
+    success: "অভিনন্দন! আপনার KYC যাচাইকরণ সম্পূর্ণ হয়েছে।"
   }
 };
 
@@ -44,14 +55,40 @@ export const useVoiceGuidance = () => {
     const text = texts[key];
 
     if (!text) {
-      console.warn(`Voice text not found for key: ${key}`);
+      // Fallback to translation system
+      const fallbackText = getTranslation(key, language);
+      if (fallbackText === key) {
+        console.warn(`Voice text not found for key: ${key}`);
+        return;
+      }
+      speak(fallbackText, language);
       return;
     }
 
     setIsPlaying(true);
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
+    
+    // Set appropriate language code for speech synthesis
+    const speechLangMap: Record<string, string> = {
+      'en': 'en-IN',
+      'hi': 'hi-IN',
+      'bn': 'bn-IN',
+      'te': 'te-IN',
+      'mr': 'mr-IN',
+      'ta': 'ta-IN',
+      'gu': 'gu-IN',
+      'kn': 'kn-IN',
+      'ml': 'ml-IN',
+      'pa': 'pa-IN',
+      'or': 'or-IN',
+      'as': 'as-IN',
+      'ur': 'ur-IN',
+      'ne': 'ne-NP',
+      'si': 'si-LK'
+    };
+    
+    utterance.lang = speechLangMap[language] || 'en-IN';
     utterance.rate = 0.9;
     utterance.pitch = 1;
 

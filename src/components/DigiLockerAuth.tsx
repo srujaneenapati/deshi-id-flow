@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Shield, CheckCircle, AlertCircle, FileText, Loader2 } from "lucide-react";
 import { useDigiLocker } from "@/hooks/useDigiLocker";
 import { useToast } from "@/hooks/use-toast";
+import { getTranslation } from "@/lib/languages";
 
 interface DigiLockerAuthProps {
   sessionToken: string;
@@ -17,8 +18,7 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
   const [documents, setDocuments] = useState<any[]>([]);
   const { authenticateWithDigiLocker, authenticating } = useDigiLocker();
   const { toast } = useToast();
-
-  const isHindi = language === 'hi';
+  const t = (key: string) => getTranslation(key, language);
 
   const handleConnect = async () => {
     setStep('connecting');
@@ -29,8 +29,8 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
       setDocuments(result);
       setStep('success');
       toast({
-        title: isHindi ? "सफल" : "Success",
-        description: isHindi ? "डिजिलॉकर से दस्तावेज़ प्राप्त हुए" : "Documents fetched from DigiLocker",
+        title: t('success'),
+        description: "Documents fetched from DigiLocker",
       });
       
       // Auto proceed after 3 seconds
@@ -40,8 +40,8 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
     } else {
       setStep('error');
       toast({
-        title: isHindi ? "त्रुटि" : "Error",
-        description: isHindi ? "डिजिलॉकर कनेक्शन विफल" : "DigiLocker connection failed",
+        title: t('error'),
+        description: "DigiLocker connection failed",
         variant: "destructive",
       });
     }
@@ -55,26 +55,23 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
             <Shield className="h-12 w-12 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">
-            {isHindi ? "डिजिलॉकर प्राधिकरण" : "DigiLocker Authorization"}
+            {t('digilockerAuth')}
           </h2>
           <p className="text-muted-foreground">
-            {isHindi 
-              ? "आपके दस्तावेज़ों को सुरक्षित रूप से एक्सेस करने के लिए अनुमति दें"
-              : "Allow secure access to your documents"
-            }
+            {t('allowSecureAccess')}
           </p>
         </div>
 
         <Card className="p-6">
           <div className="space-y-4">
             <h3 className="font-semibold">
-              {isHindi ? "हम निम्नलिखित तक पहुंच का अनुरोध करते हैं:" : "We request access to:"}
+              {t('requestAccess')}
             </h3>
             <ul className="space-y-2">
               {[
-                { name: isHindi ? "आधार कार्ड" : "Aadhaar Card", required: true },
-                { name: isHindi ? "पैन कार्ड" : "PAN Card", required: true },
-                { name: isHindi ? "ड्राइविंग लाइसेंस" : "Driving License", required: false },
+                { name: t('aadhaarCard'), required: true },
+                { name: t('panCard'), required: true },
+                { name: t('drivingLicense'), required: false },
               ].map((doc, index) => (
                 <li key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -82,7 +79,7 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
                     <span>{doc.name}</span>
                   </div>
                   <Badge variant={doc.required ? "default" : "outline"}>
-                    {doc.required ? (isHindi ? "आवश्यक" : "Required") : (isHindi ? "वैकल्पिक" : "Optional")}
+                    {doc.required ? t('required') : t('optional')}
                   </Badge>
                 </li>
               ))}
@@ -96,10 +93,7 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
               🔒 🛡️ ✅
             </div>
             <p className="text-sm font-medium">
-              {isHindi 
-                ? "आपका डेटा एन्क्रिप्टेड और सुरक्षित है • सरकारी मान्यता प्राप्त"
-                : "Your data is encrypted and secure • Government verified"
-              }
+              {t('dataSecure')} • {t('govRecognized')}
             </p>
           </div>
         </div>
@@ -114,21 +108,18 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
           {authenticating ? (
             <>
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              {isHindi ? "कनेक्ट हो रहा है..." : "Connecting..."}
+              {t('connecting')}
             </>
           ) : (
             <>
               <Shield className="h-5 w-5 mr-2" />
-              {isHindi ? "डिजिलॉकर से कनेक्ट करें" : "Connect with DigiLocker"}
+              {t('connectDigilocker')}
             </>
           )}
         </Button>
 
         <p className="text-center text-xs text-muted-foreground">
-          {isHindi 
-            ? "डिजिलॉकर की आधिकारिक वेबसाइट पर रीडायरेक्ट किया जाएगा"
-            : "You will be redirected to DigiLocker's official website"
-          }
+          {t('redirectNotice')}
         </p>
       </div>
     );
@@ -142,13 +133,10 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-primary">
-            {isHindi ? "डिजिलॉकर से कनेक्ट हो रहे हैं" : "Connecting to DigiLocker"}
+            {t('connecting')} DigiLocker
           </h2>
           <p className="text-muted-foreground">
-            {isHindi 
-              ? "कृपया प्रतीक्षा करें जबकि हम आपके दस्तावेज़ प्राप्त कर रहे हैं..."
-              : "Please wait while we fetch your documents..."
-            }
+            Please wait while we fetch your documents...
           </p>
         </div>
         <div className="space-y-2">
@@ -170,13 +158,10 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
             <CheckCircle className="h-12 w-12 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-success">
-            {isHindi ? "सफलतापूर्वक कनेक्ट हुआ!" : "Successfully Connected!"}
+            Successfully Connected!
           </h2>
           <p className="text-muted-foreground">
-            {isHindi 
-              ? "आपके दस्तावेज़ सत्यापित हो गए हैं"
-              : "Your documents have been verified"
-            }
+            Your documents have been verified
           </p>
         </div>
 
@@ -189,17 +174,19 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
                   <div>
                     <h3 className="font-medium">
                       {doc.type === 'aadhaar' 
-                        ? (isHindi ? "आधार कार्ड" : "Aadhaar Card")
-                        : (isHindi ? "पैन कार्ड" : "PAN Card")
+                        ? t('aadhaarCard')
+                        : doc.type === 'pan'
+                          ? t('panCard')
+                          : t('drivingLicense')
                       }
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {doc.data.number}
+                      {doc.data?.number || 'Document verified'}
                     </p>
                   </div>
                 </div>
                 <Badge variant="secondary" className="bg-success/10 text-success">
-                  {isHindi ? "सत्यापित" : "Verified"}
+                  {t('verified')}
                 </Badge>
               </div>
             </Card>
@@ -208,10 +195,7 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
 
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
-            {isHindi 
-              ? "फेस वेरिफिकेशन के लिए आगे बढ़ रहे हैं..."
-              : "Proceeding to face verification..."
-            }
+            Proceeding to face verification...
           </p>
         </div>
       </div>
@@ -226,13 +210,10 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
           <AlertCircle className="h-12 w-12 text-red-600" />
         </div>
         <h2 className="text-2xl font-bold text-red-600">
-          {isHindi ? "कनेक्शन विफल" : "Connection Failed"}
+          Connection Failed
         </h2>
         <p className="text-muted-foreground">
-          {isHindi 
-            ? "डिजिलॉकर से कनेक्ट करने में समस्या हुई"
-            : "There was a problem connecting to DigiLocker"
-          }
+          There was a problem connecting to DigiLocker
         </p>
       </div>
 
@@ -242,7 +223,7 @@ export function DigiLockerAuth({ sessionToken, language, onComplete }: DigiLocke
         className="w-full"
         onClick={() => setStep('consent')}
       >
-        {isHindi ? "पुनः प्रयास करें" : "Try Again"}
+        {t('tryAgain')}
       </Button>
     </div>
   );

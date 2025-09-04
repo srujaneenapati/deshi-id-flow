@@ -15,7 +15,7 @@ export const useFaceVerification = () => {
   const verifyFace = async (
     sessionToken: string,
     livenessChecks: Record<string, boolean>,
-    faceImageData?: string
+    faceImageData: string
   ): Promise<FaceVerificationResult | null> => {
     setVerifying(true);
     setError(null);
