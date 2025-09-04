@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Camera, Upload, CheckCircle, AlertCircle, FileText } from "lucide-react";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentUploadProps {
+  sessionToken: string;
   onComplete: () => void;
 }
 
@@ -18,34 +21,66 @@ interface DocumentStatus {
   required: boolean;
 }
 
-export function DocumentUpload({ onComplete }: DocumentUploadProps) {
+export function DocumentUpload({ sessionToken, onComplete }: DocumentUploadProps) {
   const [documents, setDocuments] = useState<DocumentStatus[]>([
     { id: 'aadhaar', name: 'Aadhaar Card', icon: FileText, status: 'pending', required: true },
     { id: 'pan', name: 'PAN Card', icon: FileText, status: 'pending', required: true },
   ]);
+  const { uploadDocument, uploading } = useDocumentUpload();
+  const { toast } = useToast();
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const handleFileSelect = (docId: string, file: File) => {
+    if (!sessionToken) {
+      toast({
+        title: "Error",
+        description: "No active session found. Please restart KYC.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleDocumentUpload = (docId: string) => {
-    // Simulate upload process
+    handleDocumentUpload(docId, file);
+  };
+
+  const handleDocumentUpload = async (docId: string, file: File) => {
     setDocuments(prev => prev.map(doc => 
       doc.id === docId ? { ...doc, status: 'uploading', progress: 0 } : doc
     ));
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setDocuments(prev => prev.map(doc => {
-        if (doc.id === docId && doc.status === 'uploading') {
-          const newProgress = (doc.progress || 0) + 20;
-          if (newProgress >= 100) {
-            clearInterval(interval);
-            return { ...doc, status: 'success', progress: 100 };
-          }
-          return { ...doc, progress: newProgress };
-        }
-        return doc;
-      }));
-    }, 300);
+    const result = await uploadDocument(sessionToken, docId, file);
+    
+    if (result) {
+      setDocuments(prev => prev.map(doc => 
+        doc.id === docId ? { ...doc, status: result.status === 'verified' ? 'success' : 'error', progress: 100 } : doc
+      ));
+      toast({
+        title: "Upload Successful",
+        description: `${docId.toUpperCase()} document verified successfully`,
+      });
+    } else {
+      setDocuments(prev => prev.map(doc => 
+        doc.id === docId ? { ...doc, status: 'error', progress: 0 } : doc
+      ));
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload document. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const triggerFileInput = (docId: string) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        handleFileSelect(docId, file);
+      }
+    };
+    input.click();
   };
 
   const allRequiredComplete = documents
@@ -113,7 +148,8 @@ export function DocumentUpload({ onComplete }: DocumentUploadProps) {
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => handleDocumentUpload(doc.id)}
+                    onClick={() => triggerFileInput(doc.id)}
+                    disabled={uploading}
                   >
                     <Camera className="h-4 w-4 mr-2" />
                     Take Photo
@@ -122,7 +158,8 @@ export function DocumentUpload({ onComplete }: DocumentUploadProps) {
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => handleDocumentUpload(doc.id)}
+                    onClick={() => triggerFileInput(doc.id)}
+                    disabled={uploading}
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Upload File
@@ -135,7 +172,8 @@ export function DocumentUpload({ onComplete }: DocumentUploadProps) {
                   variant="outline"
                   size="sm"
                   className="w-full text-error border-error/50"
-                  onClick={() => handleDocumentUpload(doc.id)}
+                  onClick={() => triggerFileInput(doc.id)}
+                  disabled={uploading}
                 >
                   Retry Upload
                 </Button>

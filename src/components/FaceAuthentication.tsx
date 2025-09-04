@@ -4,8 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Camera, CheckCircle, RotateCcw, Eye, Smile } from "lucide-react";
+import { useFaceVerification } from "@/hooks/useFaceVerification";
+import { useToast } from "@/hooks/use-toast";
 
 interface FaceAuthenticationProps {
+  sessionToken: string;
   onComplete: () => void;
 }
 
@@ -16,7 +19,7 @@ interface LivenessCheck {
   completed: boolean;
 }
 
-export function FaceAuthentication({ onComplete }: FaceAuthenticationProps) {
+export function FaceAuthentication({ sessionToken, onComplete }: FaceAuthenticationProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,6 +31,8 @@ export function FaceAuthentication({ onComplete }: FaceAuthenticationProps) {
   ]);
 
   const [faceMatchProgress, setFaceMatchProgress] = useState(0);
+  const { verifyFace, verifying } = useFaceVerification();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (currentStep === 1) {
@@ -45,9 +50,33 @@ export function FaceAuthentication({ onComplete }: FaceAuthenticationProps) {
       }, 2000);
 
       // Auto proceed after all checks
-      setTimeout(() => {
+      setTimeout(async () => {
         clearInterval(interval);
         setCurrentStep(2);
+        
+        // Perform face verification
+        const livenessData = livenessChecks.reduce((acc, check) => {
+          acc[check.id] = check.completed;
+          return acc;
+        }, {} as Record<string, boolean>);
+
+        const result = await verifyFace(sessionToken, livenessData);
+        
+        if (result && result.sessionCompleted) {
+          setTimeout(() => {
+            toast({
+              title: "Face Verification Successful",
+              description: "KYC completed successfully!",
+            });
+            onComplete();
+          }, 2000);
+        } else {
+          toast({
+            title: "Face Verification Failed", 
+            description: "Please try again.",
+            variant: "destructive",
+          });
+        }
       }, 7000);
 
       return () => clearInterval(interval);

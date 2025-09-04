@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Volume2, Shield, Clock, CheckCircle } from "lucide-react";
 import kycHeroIcon from "@/assets/kyc-hero-icon.png";
+import { useVoiceGuidance } from "@/hooks/useVoiceGuidance";
 
 interface WelcomeScreenProps {
   selectedLanguage: string;
@@ -9,9 +10,10 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps) {
+  const { speak, isPlaying } = useVoiceGuidance();
+
   const playWelcomeAudio = () => {
-    // In real app, this would play actual audio in selected language
-    console.log(`Playing welcome audio in ${selectedLanguage}`);
+    speak('welcome', selectedLanguage);
   };
 
   const features = [
@@ -68,9 +70,13 @@ export function WelcomeScreen({ selectedLanguage, onStart }: WelcomeScreenProps)
           size="lg"
           onClick={playWelcomeAudio}
           className="shadow-soft"
+          disabled={isPlaying}
         >
-          <Volume2 className="h-4 w-4 mr-2" />
-          {selectedLanguage === 'hi' ? 'आवाज़ सुनें' : 'Listen to Audio Guide'}
+          <Volume2 className={`h-4 w-4 mr-2 ${isPlaying ? 'animate-pulse' : ''}`} />
+          {isPlaying 
+            ? (selectedLanguage === 'hi' ? 'चल रहा है...' : 'Playing...')
+            : (selectedLanguage === 'hi' ? 'आवाज़ सुनें' : 'Listen to Audio Guide')
+          }
         </Button>
       </div>
 

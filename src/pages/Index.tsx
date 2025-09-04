@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { KYCMethodSelector } from "@/components/KYCMethodSelector";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { FaceAuthentication } from "@/components/FaceAuthentication";
 import { SuccessScreen } from "@/components/SuccessScreen";
+import { DigiLockerAuth } from "@/components/DigiLockerAuth";
+import { useKYCSession } from "@/hooks/useKYCSession";
+import { useToast } from "@/hooks/use-toast";
 
 type KYCStep = 'language' | 'welcome' | 'method' | 'digilocker' | 'upload' | 'face' | 'success' | 'complete';
 type KYCMethod = 'digilocker' | 'manual' | null;
@@ -13,10 +16,19 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState<KYCStep>('language');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [kycMethod, setKycMethod] = useState<KYCMethod>(null);
+  const { session, createSession, loading } = useKYCSession();
+  const { toast } = useToast();
 
-  const handleLanguageSelect = (language: string) => {
+  const handleLanguageSelect = async (language: string) => {
     setSelectedLanguage(language);
-    setCurrentStep('welcome');
+    const newSession = await createSession(language);
+    if (newSession) {
+      setCurrentStep('welcome');
+      toast({
+        title: "Language Selected",
+        description: `KYC session started in ${language === 'hi' ? 'Hindi' : 'English'}`,
+      });
+    }
   };
 
   const handleWelcomeStart = () => {
@@ -26,8 +38,7 @@ const Index = () => {
   const handleMethodSelect = (method: 'digilocker' | 'manual') => {
     setKycMethod(method);
     if (method === 'digilocker') {
-      // In real app, this would redirect to DigiLocker
-      setTimeout(() => setCurrentStep('face'), 2000);
+      setCurrentStep('digilocker');
     } else {
       setCurrentStep('upload');
     }
@@ -65,13 +76,27 @@ const Index = () => {
         return (
           <KYCMethodSelector onMethodSelect={handleMethodSelect} />
         );
+      case 'digilocker':
+        return (
+          <DigiLockerAuth 
+            sessionToken={session?.sessionToken || ''} 
+            language={selectedLanguage}
+            onComplete={() => setCurrentStep('face')} 
+          />
+        );
       case 'upload':
         return (
-          <DocumentUpload onComplete={handleUploadComplete} />
+          <DocumentUpload 
+            sessionToken={session?.sessionToken || ''} 
+            onComplete={handleUploadComplete} 
+          />
         );
       case 'face':
         return (
-          <FaceAuthentication onComplete={handleFaceComplete} />
+          <FaceAuthentication 
+            sessionToken={session?.sessionToken || ''} 
+            onComplete={handleFaceComplete} 
+          />
         );
       case 'success':
         return (

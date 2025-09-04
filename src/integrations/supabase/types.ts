@@ -252,6 +252,127 @@ export type Database = {
         }
         Relationships: []
       }
+      face_verifications: {
+        Row: {
+          created_at: string
+          face_match_score: number | null
+          id: string
+          liveness_checks: Json | null
+          session_id: string
+          updated_at: string
+          verification_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          face_match_score?: number | null
+          id?: string
+          liveness_checks?: Json | null
+          session_id: string
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          face_match_score?: number | null
+          id?: string
+          liveness_checks?: Json | null
+          session_id?: string
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "face_verifications_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "kyc_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          extracted_data: Json | null
+          file_path: string | null
+          id: string
+          session_id: string
+          updated_at: string
+          verification_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          extracted_data?: Json | null
+          file_path?: string | null
+          id?: string
+          session_id: string
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          extracted_data?: Json | null
+          file_path?: string | null
+          id?: string
+          session_id?: string
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_documents_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "kyc_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          document_status: Json | null
+          face_verification_status: string | null
+          id: string
+          kyc_method: string | null
+          language: string
+          session_token: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          document_status?: Json | null
+          face_verification_status?: string | null
+          id?: string
+          kyc_method?: string | null
+          language?: string
+          session_token: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          document_status?: Json | null
+          face_verification_status?: string | null
+          id?: string
+          kyc_method?: string | null
+          language?: string
+          session_token?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       loan_applications: {
         Row: {
           aadhaar_number: string
