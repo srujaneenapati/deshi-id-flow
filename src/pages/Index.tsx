@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { LandingPage } from "@/components/LandingPage";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { KYCMethodSelector } from "@/components/KYCMethodSelector";
@@ -8,16 +9,23 @@ import { SuccessScreen } from "@/components/SuccessScreen";
 import { DigiLockerAuth } from "@/components/DigiLockerAuth";
 import { useKYCSession } from "@/hooks/useKYCSession";
 import { useToast } from "@/hooks/use-toast";
+import { getTranslation } from "@/lib/languages";
 
-type KYCStep = 'language' | 'welcome' | 'method' | 'digilocker' | 'upload' | 'face' | 'success' | 'complete';
+type KYCStep = 'landing' | 'language' | 'welcome' | 'method' | 'digilocker' | 'upload' | 'face' | 'success' | 'complete';
 type KYCMethod = 'digilocker' | 'manual' | null;
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<KYCStep>('language');
+  const [currentStep, setCurrentStep] = useState<KYCStep>('landing');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [kycMethod, setKycMethod] = useState<KYCMethod>(null);
   const { session, createSession, loading } = useKYCSession();
   const { toast } = useToast();
+
+  const t = (key: string) => getTranslation(key, selectedLanguage);
+
+  const handleGetStarted = () => {
+    setCurrentStep('language');
+  };
 
   const handleLanguageSelect = async (language: string) => {
     setSelectedLanguage(language);
@@ -25,8 +33,14 @@ const Index = () => {
     if (newSession) {
       setCurrentStep('welcome');
       toast({
-        title: "Language Selected",
-        description: `KYC session started in ${language === 'hi' ? 'Hindi' : 'English'}`,
+        title: t('success'),
+        description: t('languageSelected'),
+      });
+    } else {
+      toast({
+        title: t('error'),
+        description: t('networkError'),
+        variant: "destructive",
       });
     }
   };
@@ -54,10 +68,35 @@ const Index = () => {
 
   const handleKYCComplete = () => {
     setCurrentStep('complete');
+    // In a real app, redirect to the main application
+    setTimeout(() => {
+      toast({
+        title: t('kycSuccessful'),
+        description: t('kycCompleted'),
+      });
+    }, 2000);
   };
+
+  // Security: Clear sensitive data on unmount
+  useEffect(() => {
+    return () => {
+      // Clear any sensitive data from memory
+      if (session?.sessionToken) {
+        // In production, also clear from localStorage after successful completion
+        localStorage.removeItem('kyc_session_token');
+      }
+    };
+  }, [session]);
 
   const renderStep = () => {
     switch (currentStep) {
+      case 'landing':
+        return (
+          <LandingPage
+            language={selectedLanguage}
+            onGetStarted={handleGetStarted}
+          />
+        );
       case 'language':
         return (
           <LanguageSelector
@@ -74,7 +113,10 @@ const Index = () => {
         );
       case 'method':
         return (
-          <KYCMethodSelector onMethodSelect={handleMethodSelect} />
+          <KYCMethodSelector 
+            language={selectedLanguage}
+            onMethodSelect={handleMethodSelect} 
+          />
         );
       case 'digilocker':
         return (
@@ -88,6 +130,7 @@ const Index = () => {
         return (
           <DocumentUpload 
             sessionToken={session?.sessionToken || ''} 
+            language={selectedLanguage}
             onComplete={handleUploadComplete} 
           />
         );
@@ -101,13 +144,16 @@ const Index = () => {
         );
       case 'success':
         return (
-          <SuccessScreen onComplete={handleKYCComplete} />
+          <SuccessScreen 
+            language={selectedLanguage}
+            onComplete={handleKYCComplete} 
+          />
         );
       case 'complete':
         return (
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold text-success">KYC Complete!</h2>
-            <p className="text-muted-foreground">You will now be redirected to your app...</p>
+            <h2 className="text-2xl font-bold text-success">{t('kycSuccessful')}</h2>
+            <p className="text-muted-foreground">{t('pleaseWait')}</p>
             <div className="w-16 h-16 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
         );
@@ -116,8 +162,23 @@ const Index = () => {
     }
   };
 
+  // Show landing page in full screen, others in container
+  if (currentStep === 'landing') {
+    return renderStep();
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Security indicator */}
+      <div className="bg-success/10 border-b border-success/20 py-2">
+        <div className="container max-w-lg mx-auto px-4">
+          <div className="flex items-center justify-center gap-2 text-xs text-success">
+            <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+            {t('secureConnection')} • {t('encryptedData')}
+          </div>
+        </div>
+      </div>
+
       <div className="container max-w-lg mx-auto px-4 py-8">
         {renderStep()}
       </div>

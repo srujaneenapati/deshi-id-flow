@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { supportedLanguages } from "@/lib/languages";
+import { supportedLanguages, getTranslation } from "@/lib/languages";
 
 interface LanguageSelectorProps {
   selectedLanguage: string;
@@ -8,11 +8,17 @@ interface LanguageSelectorProps {
 }
 
 export function LanguageSelector({ selectedLanguage, onLanguageSelect }: LanguageSelectorProps) {
+  const t = (key: string) => getTranslation(key, selectedLanguage);
+
   return (
     <div className="space-y-4">
       <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold text-foreground">Choose Your Language</h2>
-        <p className="text-muted-foreground">अपनी भाषा चुनें | আপনার ভাষা নির্বাচন করুন</p>
+        <h2 className="text-xl font-semibold text-foreground">{t('step1Title')}</h2>
+        <p className="text-muted-foreground">
+          {selectedLanguage === 'hi' ? 'अपनी भाषा चुनें' : 
+           selectedLanguage === 'bn' ? 'আপনার ভাষা নির্বাচন করুন' :
+           'Choose Your Language'}
+        </p>
       </div>
       
       <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto max-h-96 overflow-y-auto">
@@ -33,6 +39,12 @@ export function LanguageSelector({ selectedLanguage, onLanguageSelect }: Languag
             </div>
           </Card>
         ))}
+      </div>
+      
+      <div className="text-center">
+        <p className="text-xs text-muted-foreground">
+          🌐 {t('feature4Desc')}
+        </p>
       </div>
     </div>
   );

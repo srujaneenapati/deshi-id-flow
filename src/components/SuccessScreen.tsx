@@ -3,13 +3,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Shield, Download, Share2, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getTranslation } from "@/lib/languages";
 
 interface SuccessScreenProps {
+  language: string;
   onComplete: () => void;
 }
 
-export function SuccessScreen({ onComplete }: SuccessScreenProps) {
+export function SuccessScreen({ language, onComplete }: SuccessScreenProps) {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const t = (key: string) => getTranslation(key, language);
 
   // Simulate voice confirmation
   const playVoiceConfirmation = () => {
@@ -26,10 +29,10 @@ export function SuccessScreen({ onComplete }: SuccessScreenProps) {
   }, []);
 
   const kycDetails = {
-    name: "आपका नाम / Your Name",
+    name: t('appTitle'),
     aadhaar: "XXXX XXXX 1234",
     pan: "ABCDE1234F",
-    status: "Verified",
+    status: t('verified'),
     timestamp: new Date().toLocaleString(),
     kycId: "KYC" + Math.random().toString(36).substr(2, 8).toUpperCase()
   };
@@ -41,8 +44,8 @@ export function SuccessScreen({ onComplete }: SuccessScreenProps) {
           <CheckCircle className="h-12 w-12 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-success">KYC Successful!</h2>
-          <p className="text-muted-foreground">आपका KYC सफलतापूर्वक पूरा हो गया</p>
+          <h2 className="text-2xl font-bold text-success">{t('kycSuccessful')}</h2>
+          <p className="text-muted-foreground">{t('kycCompleted')}</p>
         </div>
       </div>
 
@@ -53,9 +56,9 @@ export function SuccessScreen({ onComplete }: SuccessScreenProps) {
             <Volume2 className={`h-5 w-5 text-success ${isPlayingAudio ? 'animate-bounce' : ''}`} />
           </div>
           <div className="flex-1">
-            <p className="font-medium text-success">Voice Confirmation</p>
+            <p className="font-medium text-success">{t('voiceConfirmation')}</p>
             <p className="text-sm text-muted-foreground">
-              {isPlayingAudio ? "Playing audio confirmation..." : "Audio confirmation completed"}
+              {isPlayingAudio ? t('playing') : t('audioConfirmation')}
             </p>
           </div>
           <Button
@@ -64,7 +67,7 @@ export function SuccessScreen({ onComplete }: SuccessScreenProps) {
             onClick={playVoiceConfirmation}
             disabled={isPlayingAudio}
           >
-            🔊 Replay
+            🔊 {t('replay')}
           </Button>
         </div>
       </Card>
@@ -73,32 +76,32 @@ export function SuccessScreen({ onComplete }: SuccessScreenProps) {
       <Card className="p-6">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Verification Summary</h3>
+            <h3 className="font-semibold">{t('verificationSummary')}</h3>
             <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
               <Shield className="h-3 w-3 mr-1" />
-              Verified
+              {t('verified')}
             </Badge>
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b border-border/50">
-              <span className="text-muted-foreground">KYC ID</span>
+              <span className="text-muted-foreground">{t('kycId')}</span>
               <span className="font-mono font-medium">{kycDetails.kycId}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-border/50">
-              <span className="text-muted-foreground">Aadhaar</span>
+              <span className="text-muted-foreground">{t('aadhaarCard')}</span>
               <span className="font-mono">{kycDetails.aadhaar}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-border/50">
-              <span className="text-muted-foreground">PAN</span>
+              <span className="text-muted-foreground">{t('panCard')}</span>
               <span className="font-mono">{kycDetails.pan}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-border/50">
-              <span className="text-muted-foreground">Face Match</span>
+              <span className="text-muted-foreground">{t('faceMatch')}</span>
               <span className="text-success font-medium">98.7% ✓</span>
             </div>
             <div className="flex justify-between py-2">
-              <span className="text-muted-foreground">Completed</span>
+              <span className="text-muted-foreground">{t('completed')}</span>
               <span className="text-sm">{kycDetails.timestamp}</span>
             </div>
           </div>
@@ -113,17 +116,17 @@ export function SuccessScreen({ onComplete }: SuccessScreenProps) {
           className="w-full"
           onClick={onComplete}
         >
-          Continue to App
+          {t('continueToApp')}
         </Button>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" size="lg" className="flex-1">
             <Download className="h-4 w-4 mr-2" />
-            Download Report
+            {t('downloadReport')}
           </Button>
           <Button variant="outline" size="lg" className="flex-1">
             <Share2 className="h-4 w-4 mr-2" />
-            Share KYC
+            {t('shareKYC')}
           </Button>
         </div>
       </div>
@@ -133,9 +136,9 @@ export function SuccessScreen({ onComplete }: SuccessScreenProps) {
         <div className="flex items-start gap-3">
           <Shield className="h-5 w-5 text-trust mt-0.5" />
           <div>
-            <h4 className="font-medium text-sm">Your Data is Secure</h4>
+            <h4 className="font-medium text-sm">{t('dataSecureNotice')}</h4>
             <p className="text-xs text-muted-foreground mt-1">
-              All documents are encrypted and stored securely. We comply with data protection regulations.
+              {t('dataProtectionNotice')}
             </p>
           </div>
         </div>

@@ -2,17 +2,21 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Upload, Shield, Clock } from "lucide-react";
+import { getTranslation } from "@/lib/languages";
 
 interface KYCMethodSelectorProps {
+  language: string;
   onMethodSelect: (method: 'digilocker' | 'manual') => void;
 }
 
-export function KYCMethodSelector({ onMethodSelect }: KYCMethodSelectorProps) {
+export function KYCMethodSelector({ language, onMethodSelect }: KYCMethodSelectorProps) {
+  const t = (key: string) => getTranslation(key, language);
+
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-foreground">Complete Your KYC</h2>
-        <p className="text-muted-foreground">Choose your preferred verification method</p>
+        <h2 className="text-2xl font-bold text-foreground">{t('completeKYC')}</h2>
+        <p className="text-muted-foreground">{t('chooseMethod')}</p>
       </div>
 
       <div className="grid gap-4 max-w-md mx-auto">
@@ -25,28 +29,28 @@ export function KYCMethodSelector({ onMethodSelect }: KYCMethodSelectorProps) {
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">DigiLocker KYC</h3>
-                  <p className="text-sm text-muted-foreground">Instant & Secure</p>
+                  <h3 className="font-semibold text-lg">{t('digilockerKYC')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('instantSecure')}</p>
                 </div>
               </div>
               <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
                 <Clock className="h-3 w-3 mr-1" />
-                1 min
+                1 {t('minutes')}
               </Badge>
             </div>
             
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-success rounded-full"></div>
-                Auto-fetch from DigiLocker
+                {t('autoFetch')}
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-success rounded-full"></div>
-                Government verified documents
+                {t('govVerified')}
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-success rounded-full"></div>
-                Fastest verification
+                {t('fastestVerification')}
               </li>
             </ul>
 
@@ -56,7 +60,7 @@ export function KYCMethodSelector({ onMethodSelect }: KYCMethodSelectorProps) {
               className="w-full"
               onClick={() => onMethodSelect('digilocker')}
             >
-              Continue with DigiLocker
+              {t('continueDigilocker')}
             </Button>
           </div>
         </Card>
@@ -70,28 +74,28 @@ export function KYCMethodSelector({ onMethodSelect }: KYCMethodSelectorProps) {
                   <Upload className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Upload Documents</h3>
-                  <p className="text-sm text-muted-foreground">Manual Verification</p>
+                  <h3 className="font-semibold text-lg">{t('uploadDocuments')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('manualVerification')}</p>
                 </div>
               </div>
               <Badge variant="outline" className="border-warning text-warning">
                 <Clock className="h-3 w-3 mr-1" />
-                3 min
+                3 {t('minutes')}
               </Badge>
             </div>
             
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                Upload Aadhaar, PAN, etc.
+                {t('uploadAadhaarPan')}
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                Take clear photos
+                {t('takeClearPhotos')}
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                Works without DigiLocker
+                {t('worksWithoutDigilocker')}
               </li>
             </ul>
 
@@ -101,7 +105,7 @@ export function KYCMethodSelector({ onMethodSelect }: KYCMethodSelectorProps) {
               className="w-full"
               onClick={() => onMethodSelect('manual')}
             >
-              Upload Documents
+              {t('uploadDocuments')}
             </Button>
           </div>
         </Card>
@@ -109,7 +113,7 @@ export function KYCMethodSelector({ onMethodSelect }: KYCMethodSelectorProps) {
 
       <div className="text-center">
         <p className="text-xs text-muted-foreground">
-          🔒 Your data is encrypted and secure
+          🔒 {t('dataSecure')}
         </p>
       </div>
     </div>

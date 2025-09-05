@@ -21,18 +21,34 @@ export const useDocumentUpload = () => {
     setError(null);
 
     try {
+      // Validate file size (max 5MB for security)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File size too large. Maximum 5MB allowed.');
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('Invalid file type. Only JPEG, PNG, and WebP images are allowed.');
+      }
+
+      // Create secure form data
       const formData = new FormData();
       formData.append('sessionToken', sessionToken);
       formData.append('documentType', documentType);
       formData.append('file', file);
 
+      // Add security headers and use HTTPS
       const response = await fetch(
-        `https://snotxicwhpivolqygtze.supabase.co/functions/v1/document-upload`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/document-upload`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNub3R4aWN3aHBpdm9scXlndHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODc1MzQsImV4cCI6MjA3MTM2MzUzNH0.jQZRKKk7yunbygeulomj7xF-B7q8vWwaUdybFMAFOKM`,
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNub3R4aWN3aHBpdm9scXlndHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3ODc1MzQsImV4cCI6MjA3MTM2MzUzNH0.jQZRKKk7yunbygeulomj7xF-B7q8vWwaUdybFMAFOKM',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            // Add security headers
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Content-Type-Options': 'nosniff',
           },
           body: formData
         }
@@ -44,8 +60,15 @@ export const useDocumentUpload = () => {
       }
 
       const data = await response.json();
+      
+      // Validate response data
+      if (!data.success || !data.document) {
+        throw new Error('Invalid response from server');
+      }
+
       return data.document;
     } catch (err: any) {
+      console.error('Document upload error:', err);
       setError(err.message);
       return null;
     } finally {
